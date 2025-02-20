@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { sendMagicLinkEmail } from "./email";
 
 declare global {
   namespace Express {
@@ -49,7 +50,7 @@ export function setupAuth(app: Express) {
     new LocalStrategy(async (username, password, done) => {
       try {
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
+        if (!user || !user.password || !(await comparePasswords(password, user.password))) {
           return done(null, false);
         }
         return done(null, user);
@@ -69,6 +70,7 @@ export function setupAuth(app: Express) {
     }
   });
 
+  // Existing routes
   app.post("/api/register", async (req, res, next) => {
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
@@ -78,7 +80,7 @@ export function setupAuth(app: Express) {
 
       const user = await storage.createUser({
         ...req.body,
-        password: await hashPassword(req.body.password),
+        password: req.body.password ? await hashPassword(req.body.password) : null,
       });
 
       req.login(user, (err) => {
@@ -92,6 +94,65 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
     res.json(req.user);
+  });
+
+  // New magic link routes
+  app.post("/api/magic-link", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      let user = await storage.getUserByEmail(email);
+
+      // Create user if they don't exist
+      if (!user) {
+        const username = email.split('@')[0];
+        user = await storage.createUser({
+          email,
+          username,
+        });
+      }
+
+      const magicLink = await storage.createMagicLink(user.id);
+      const emailSent = await sendMagicLinkEmail(
+        email,
+        magicLink.token,
+        `${req.protocol}://${req.get('host')}`
+      );
+
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send magic link email" });
+      }
+
+      res.json({ message: "Magic link sent to your email" });
+    } catch (error) {
+      console.error("Magic link error:", error);
+      res.status(500).json({ message: "Failed to create magic link" });
+    }
+  });
+
+  app.get("/api/verify", async (req, res, next) => {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({ message: "Invalid token" });
+    }
+
+    try {
+      const user = await storage.validateMagicLink(token);
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired token" });
+      }
+
+      req.login(user, (err) => {
+        if (err) return next(err);
+        // Return the user object instead of redirecting
+        res.json(user);
+      });
+    } catch (error) {
+      console.error("Token verification error:", error);
+      res.status(500).json({ message: "Failed to verify token" });
+    }
   });
 
   app.post("/api/logout", (req, res, next) => {

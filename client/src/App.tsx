@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
+import VerifyPage from "@/pages/verify-page";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/auth/verify" component={VerifyPage} />
       <Route component={NotFound} />
     </Switch>
   );
