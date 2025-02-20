@@ -1,12 +1,13 @@
 import { useEffect } from "react";
-import { useLocation, useLocation as useWouterLocation, useRoute } from "wouter";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
 export default function VerifyPage() {
   const [, setLocation] = useLocation();
-  const [, params] = useRoute("/auth/verify");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -14,20 +15,20 @@ export default function VerifyPage() {
       try {
         const searchParams = new URLSearchParams(window.location.search);
         const token = searchParams.get("token");
-        
+
         if (!token) {
           throw new Error("No token provided");
         }
 
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
         const user = await res.json();
-        
+
         // Update the auth state
         queryClient.setQueryData(["/api/user"], user);
-        
+
         // Redirect to home page
         setLocation("/");
-        
+
         toast({
           title: "Success",
           description: "You have been successfully logged in",
