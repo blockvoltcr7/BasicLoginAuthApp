@@ -146,7 +146,8 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        res.redirect('/');
+        // Return the user object instead of redirecting
+        res.json(user);
       });
     } catch (error) {
       console.error("Token verification error:", error);
