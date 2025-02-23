@@ -6,8 +6,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
-  role: text("role").notNull().default('user'),
+  password: text("password"),  // Make password optional since we'll support magic links
   isAdmin: boolean("is_admin").notNull().default(false),
 });
 
