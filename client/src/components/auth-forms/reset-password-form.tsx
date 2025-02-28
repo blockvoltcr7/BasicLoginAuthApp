@@ -43,8 +43,8 @@ export function ResetPasswordForm({ token, onSuccess }: Props) {
         description: "Your password has been reset successfully. Please log in with your new password.",
       });
 
-      // Call the onSuccess callback to trigger navigation to /auth
-      onSuccess();
+      // Navigate to login page after successful password reset
+      window.location.href = "/auth";
     } catch (error) {
       console.error("[ResetPasswordForm] Password reset error:", error);
       toast({
