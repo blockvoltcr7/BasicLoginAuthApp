@@ -11,11 +11,12 @@ type ProtectedRouteProps = {
 export function ProtectedRoute({ path, component: Component, requireAdmin }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
 
-  // Allow public access to auth-related routes
-  const isPublicRoute = path.startsWith("/verify") || 
-                       path.startsWith("/reset-password") || 
-                       path.startsWith("/forgot-password") ||
-                       path.startsWith("/auth");
+  // Check if this is a public route that doesn't require auth
+  const isPublicRoute = 
+    path === "/auth" ||
+    path === "/verify" ||
+    path === "/reset-password" ||
+    path === "/forgot-password";
 
   if (isLoading) {
     return (
@@ -27,7 +28,18 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
     );
   }
 
-  if (!isPublicRoute && (!user || (requireAdmin && !user.isAdmin))) {
+  // Handle reset password flow separately
+  if (path === "/reset-password") {
+    return <Route path={path} component={Component} />;
+  }
+
+  // Allow access to public routes without auth
+  if (isPublicRoute) {
+    return <Route path={path} component={Component} />;
+  }
+
+  // Require auth for protected routes
+  if (!user || (requireAdmin && !user.isAdmin)) {
     return (
       <Route path={path}>
         <Redirect to="/auth" />

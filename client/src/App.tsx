@@ -15,11 +15,18 @@ import { ProtectedRoute } from "./lib/protected-route";
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={HomePage} />
-      <Route path="/auth" component={AuthPage} />
+      {/* Handle verification and reset password routes first */}
       <Route path="/verify" component={VerifyPage} />
-      <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
+
+      {/* Other public routes */}
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/auth" component={AuthPage} />
+
+      {/* Protected routes */}
+      <ProtectedRoute path="/" component={HomePage} />
+
+      {/* Catch-all route */}
       <Route component={NotFound} />
     </Switch>
   );

@@ -27,11 +27,8 @@ export default function VerifyPage() {
           const data = await res.json();
 
           if (res.status === 200 && data.message === "Token valid") {
-            toast({
-              title: "Success",
-              description: "Token verified. Please set your new password.",
-            });
-            setLocation(`/reset-password?token=${token}`);
+            // Navigate directly to reset password page
+            window.location.href = `/reset-password?token=${token}`;
             return;
           } else {
             throw new Error(data.message || "Invalid or expired token");
