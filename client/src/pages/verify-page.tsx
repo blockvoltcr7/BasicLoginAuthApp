@@ -15,19 +15,24 @@ export default function VerifyPage() {
       try {
         const searchParams = new URLSearchParams(window.location.search);
         const token = searchParams.get("token");
+        const type = searchParams.get("type");
 
         if (!token) {
           throw new Error("No token provided");
         }
 
-        // Check if this is a reset password token by looking at the URL path
-        const isResetPasswordToken = window.location.pathname.includes("reset-password");
-        if (isResetPasswordToken) {
-          setLocation(`/auth/reset-password?token=${token}`);
-          return;
+        // Handle password reset token verification
+        if (type === "reset-password") {
+          const res = await apiRequest("GET", `/api/verify?token=${token}&type=reset-password`);
+          const data = await res.json();
+
+          if (data.token) {
+            setLocation(`/auth/reset-password?token=${token}`);
+            return;
+          }
         }
 
-        // Otherwise, proceed with magic link verification
+        // Handle magic link verification
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
         const user = await res.json();
 

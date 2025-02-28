@@ -131,22 +131,30 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/verify", async (req, res, next) => {
-    const { token } = req.query;
+    const { token, type } = req.query;
 
     if (!token || typeof token !== "string") {
       return res.status(400).json({ message: "Invalid token" });
     }
 
     try {
-      const user = await storage.validateMagicLink(token);
+      // Handle password reset token verification
+      if (type === "reset-password") {
+        const resetToken = await storage.validatePasswordResetToken(token);
+        if (!resetToken) {
+          return res.status(400).json({ message: "Invalid or expired token" });
+        }
+        return res.json({ message: "Token valid", token });
+      }
 
+      // Handle magic link verification (existing logic)
+      const user = await storage.validateMagicLink(token);
       if (!user) {
         return res.status(400).json({ message: "Invalid or expired token" });
       }
 
       req.login(user, (err) => {
         if (err) return next(err);
-        // Return the user object instead of redirecting
         res.json(user);
       });
     } catch (error) {
