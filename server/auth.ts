@@ -133,32 +133,44 @@ export function setupAuth(app: Express) {
   app.get("/api/verify", async (req, res, next) => {
     const { token, type } = req.query;
 
+    console.log("[/api/verify] Received verification request:", { token, type });
+
     if (!token || typeof token !== "string") {
+      console.log("[/api/verify] Invalid token provided");
       return res.status(400).json({ message: "Invalid token" });
     }
 
     try {
       // Handle password reset token verification
       if (type === "reset-password") {
+        console.log("[/api/verify] Verifying password reset token");
         const resetToken = await storage.validatePasswordResetToken(token);
+
         if (!resetToken) {
+          console.log("[/api/verify] Invalid or expired reset token");
           return res.status(400).json({ message: "Invalid or expired token" });
         }
+
+        console.log("[/api/verify] Reset token valid, sending success response");
         return res.json({ message: "Token valid", token });
       }
 
       // Handle magic link verification (existing logic)
+      console.log("[/api/verify] Verifying magic link token");
       const user = await storage.validateMagicLink(token);
+
       if (!user) {
+        console.log("[/api/verify] Invalid or expired magic link token");
         return res.status(400).json({ message: "Invalid or expired token" });
       }
 
+      console.log("[/api/verify] Magic link valid, logging in user:", user.id);
       req.login(user, (err) => {
         if (err) return next(err);
         res.json(user);
       });
     } catch (error) {
-      console.error("Token verification error:", error);
+      console.error("[/api/verify] Verification error:", error);
       res.status(500).json({ message: "Failed to verify token" });
     }
   });

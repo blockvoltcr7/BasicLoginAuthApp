@@ -8,11 +8,20 @@ export default function ResetPasswordPage() {
   const [location] = useLocation();
   const token = new URLSearchParams(location.split('?')[1]).get('token');
 
+  console.log("[ResetPasswordPage] Initializing with:", {
+    hasUser: !!user,
+    currentUrl: window.location.href,
+    hasToken: !!token,
+    location
+  });
+
   if (user) {
+    console.log("[ResetPasswordPage] User already logged in, redirecting to home");
     return <Redirect to="/" />;
   }
 
   if (!token) {
+    console.log("[ResetPasswordPage] No token found, redirecting to auth");
     return <Redirect to="/auth" />;
   }
 

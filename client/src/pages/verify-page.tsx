@@ -17,7 +17,12 @@ export default function VerifyPage() {
         const token = searchParams.get("token");
         const type = searchParams.get("type");
 
-        console.log("[VerifyPage] Starting verification with:", { token, type, currentUrl: window.location.href });
+        console.log("[VerifyPage] Starting verification with:", { 
+          token, 
+          type, 
+          currentUrl: window.location.href,
+          search: window.location.search 
+        });
 
         if (!token) {
           throw new Error("No token provided");
@@ -29,12 +34,17 @@ export default function VerifyPage() {
           const res = await apiRequest("GET", `/api/verify?token=${token}&type=reset-password`);
           const data = await res.json();
 
-          console.log("[VerifyPage] Password reset verification response:", { status: res.status, data });
+          console.log("[VerifyPage] Password reset verification response:", { 
+            status: res.status, 
+            data,
+            headers: res.headers 
+          });
 
           if (res.status === 200 && data.message === "Token valid") {
             console.log("[VerifyPage] Token valid, redirecting to reset password page");
-            // Use direct navigation to avoid route protection
-            window.location.replace(`/reset-password?token=${token}`);
+
+            // Use direct navigation to ensure clean state
+            window.location.href = `/reset-password?token=${token}`;
             return;
           } else {
             throw new Error(data.message || "Invalid or expired token");
@@ -44,6 +54,10 @@ export default function VerifyPage() {
         // Handle magic link verification
         console.log("[VerifyPage] Verifying magic link token");
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
+        console.log("[VerifyPage] Magic link verification response:", { 
+          status: res.status,
+          headers: res.headers
+        });
 
         if (res.status !== 200) {
           const data = await res.json();
@@ -51,6 +65,8 @@ export default function VerifyPage() {
         }
 
         const user = await res.json();
+        console.log("[VerifyPage] Magic link verified, updating user data");
+
         queryClient.setQueryData(["/api/user"], user);
         setLocation("/");
 
