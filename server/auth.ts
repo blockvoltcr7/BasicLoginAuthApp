@@ -6,7 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
-import { sendMagicLinkEmail } from "./email";
+import { sendMagicLinkEmail, sendPasswordResetEmail } from "./email";
 
 declare global {
   namespace Express {
@@ -15,6 +15,14 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
+
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split('@');
+  const maskedLocal = localPart.length > 2 
+    ? `${localPart[0]}${'*'.repeat(localPart.length - 2)}${localPart[localPart.length - 1]}`
+    : '*'.repeat(localPart.length);
+  return `${maskedLocal}@${domain}`;
+}
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -125,33 +133,106 @@ export function setupAuth(app: Express) {
 
       res.json({ message: "Magic link sent to your email" });
     } catch (error) {
-      console.error("Magic link error:", error);
+      console.error("Magic link error:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        email: maskEmail(email)
+      });
       res.status(500).json({ message: "Failed to create magic link" });
     }
   });
 
   app.get("/api/verify", async (req, res, next) => {
-    const { token } = req.query;
+    const { token, type } = req.query;
+
+    console.log("[/api/verify] Received verification request type:", { type });
 
     if (!token || typeof token !== "string") {
+      console.log("[/api/verify] Invalid token provided");
       return res.status(400).json({ message: "Invalid token" });
     }
 
     try {
+      // Handle password reset token verification
+      if (type === "reset-password") {
+        console.log("[/api/verify] Verifying password reset token");
+        const resetToken = await storage.validatePasswordResetToken(token);
+
+        if (!resetToken) {
+          console.log("[/api/verify] Invalid or expired reset token");
+          return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        console.log("[/api/verify] Reset token valid, sending success response");
+        return res.json({ message: "Token valid", token });
+      }
+
+      // Handle magic link verification (existing logic)
+      console.log("[/api/verify] Verifying magic link token");
       const user = await storage.validateMagicLink(token);
 
       if (!user) {
+        console.log("[/api/verify] Invalid or expired magic link token");
         return res.status(400).json({ message: "Invalid or expired token" });
       }
 
+      console.log("[/api/verify] Magic link valid, logging in user id:", user.id);
       req.login(user, (err) => {
         if (err) return next(err);
-        // Return the user object instead of redirecting
         res.json(user);
       });
     } catch (error) {
-      console.error("Token verification error:", error);
+      console.error("[/api/verify] Verification error:", error);
       res.status(500).json({ message: "Failed to verify token" });
+    }
+  });
+
+  // Add password reset routes
+  app.post("/api/forgot-password", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      // Always return success to prevent email enumeration
+      const user = await storage.getUserByEmail(email);
+
+      if (user) {
+        const token = await storage.createPasswordResetToken(user.id);
+        await sendPasswordResetEmail(
+          email,
+          token.token,
+          `${req.protocol}://${req.get('host')}`
+        );
+      }
+
+      res.json({ message: "If an account exists with that email, a password reset link has been sent." });
+    } catch (error) {
+      console.error("Password reset error:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        email: maskEmail(email)
+      });
+      res.status(500).json({ message: "Failed to process password reset request" });
+    }
+  });
+
+  app.post("/api/reset-password", async (req, res) => {
+    const { token, password } = req.body;
+
+    try {
+      const resetToken = await storage.validatePasswordResetToken(token);
+
+      if (!resetToken) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      await storage.updateUserPassword(resetToken.userId, hashedPassword);
+      await storage.markPasswordResetTokenAsUsed(token);
+
+      res.json({ message: "Password successfully reset" });
+    } catch (error) {
+      console.error("Password reset error:", {
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 

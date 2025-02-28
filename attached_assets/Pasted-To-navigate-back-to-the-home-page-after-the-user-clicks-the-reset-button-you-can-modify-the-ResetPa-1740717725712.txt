@@ -1,0 +1,76 @@
+To navigate back to the home page after the user clicks the reset button, you can modify the ResetPasswordForm component to include a redirection once the password reset is successful.
+
+You can achieve this by using the useEffect hook alongside the useNavigate hook from react-router-dom or directly manipulating window.location in the callback specified in the onSuccess prop.
+
+Here's how you can implement it:
+
+Updated ResetPasswordForm Component
+Add the redirection logic to your ResetPasswordForm as follows:
+
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { resetPasswordSchema } from "@shared/schema";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { apiRequest } from "@/lib/queryClient";
+export function ResetPasswordForm({ token }: { token: string }) {
+  const { resetPasswordMutation } = useAuth();
+  const form = useForm({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      token,
+      password: "",
+    },
+  });
+  // State to manage successful reset
+  const [isResetSuccessful, setIsResetSuccessful] = useState(false);
+  // Effect to redirect to home page upon successful reset
+  useEffect(() => {
+    if (isResetSuccessful) {
+      window.location.href = "/"; // Navigate to home page
+    }
+  }, [isResetSuccessful]);
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit((data) => {
+          resetPasswordMutation.mutate(data, {
+            onSuccess: () => {
+              setIsResetSuccessful(true); // Mark as successful
+            },
+          });
+        })}
+        className="space-y-4"
+      >
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={resetPasswordMutation.isPending}
+        >
+          Reset Password
+        </Button>
+      </form>
+    </Form>
+  );
+}
+Key Changes
+isResetSuccessful State: This state tracks whether the password reset was successful.
+useEffect Hook: When isResetSuccessful is set to true, a redirection to the home page ("/") occurs.
+onSuccess Callback: The setIsResetSuccessful(true) is called to trigger the redirection after a successful password reset.
+This update to the ResetPasswordForm will ensure that after clicking the reset password button and successfully resetting the password, the user will be redirected back to the home page.

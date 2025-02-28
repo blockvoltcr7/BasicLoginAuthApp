@@ -15,18 +15,47 @@ export default function VerifyPage() {
       try {
         const searchParams = new URLSearchParams(window.location.search);
         const token = searchParams.get("token");
+        const type = searchParams.get("type");
+
+        console.log("[VerifyPage] Starting verification for type:", type);
 
         if (!token) {
           throw new Error("No token provided");
         }
 
+        // Handle password reset token verification
+        if (type === "reset-password") {
+          console.log("[VerifyPage] Verifying password reset token");
+          const res = await apiRequest("GET", `/api/verify?token=${token}&type=reset-password`);
+          const data = await res.json();
+
+          console.log("[VerifyPage] Password reset verification completed");
+
+          if (res.status === 200 && data.message === "Token valid") {
+            console.log("[VerifyPage] Token valid, redirecting to reset password page");
+
+            // Use direct navigation to ensure clean state
+            window.location.href = `/reset-password?token=${token}`;
+            return;
+          } else {
+            throw new Error(data.message || "Invalid or expired token");
+          }
+        }
+
+        // Handle magic link verification
+        console.log("[VerifyPage] Verifying magic link token");
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
+        console.log("[VerifyPage] Magic link verification completed");
+
+        if (res.status !== 200) {
+          const data = await res.json();
+          throw new Error(data.message || "Verification failed");
+        }
+
         const user = await res.json();
+        console.log("[VerifyPage] Magic link verified, redirecting");
 
-        // Update the auth state
         queryClient.setQueryData(["/api/user"], user);
-
-        // Redirect to home page
         setLocation("/");
 
         toast({
@@ -34,7 +63,7 @@ export default function VerifyPage() {
           description: "You have been successfully logged in",
         });
       } catch (error) {
-        console.error("Verification error:", error);
+        console.error("[VerifyPage] Verification error:", error);
         toast({
           title: "Verification Failed",
           description: error instanceof Error ? error.message : "Failed to verify token",
@@ -50,7 +79,7 @@ export default function VerifyPage() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <span className="ml-2">Verifying your login...</span>
+      <span className="ml-2">Verifying your request...</span>
     </div>
   );
 }

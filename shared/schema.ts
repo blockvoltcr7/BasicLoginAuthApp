@@ -18,6 +18,14 @@ export const magicLinks = pgTable("magic_links", {
   used: boolean("used").notNull().default(false),
 });
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  userId: serial("user_id").references(() => users.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").notNull().default(false),
+});
+
 export const insertUserSchema = createInsertSchema(users)
   .pick({
     username: true,
@@ -33,6 +41,16 @@ export const magicLinkSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+export const passwordResetSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type MagicLink = typeof magicLinks.$inferSelect;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;

@@ -8,20 +8,37 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
 import VerifyPage from "@/pages/verify-page";
+import ForgotPasswordPage from "@/pages/forgot-password";
+import ResetPasswordPage from "@/pages/reset-password";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={HomePage} />
+      {/* Handle verification and reset password routes first */}
+      <Route path="/verify" component={VerifyPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
+
+      {/* Other public routes */}
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/auth/verify" component={VerifyPage} />
-      <Route component={NotFound} />
+
+      {/* Protected routes */}
+      <ProtectedRoute path="/" component={HomePage} />
+
+      {/* Catch-all route */}
+      <Route path="*">
+        {(params) => {
+          console.log("[Router] No route match, showing 404 page. Path:", window.location.pathname);
+          return <NotFound />;
+        }}
+      </Route>
     </Switch>
   );
 }
 
 function App() {
+  console.log("[App] Initializing app, current path:", window.location.pathname);
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark">

@@ -4,7 +4,7 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser, magicLinkSchema } from "@shared/schema";
+import { insertUserSchema, User as SelectUser, InsertUser, magicLinkSchema, passwordResetSchema, resetPasswordSchema } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,8 @@ type AuthContextType = {
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
   magicLinkMutation: UseMutationResult<{ message: string }, Error, { email: string }>;
+  forgotPasswordMutation: UseMutationResult<{ message: string }, Error, { email: string }>;
+  resetPasswordMutation: UseMutationResult<{ message: string }, Error, { token: string; password: string }>;
 };
 
 type LoginData = Pick<InsertUser, "username" | "password">;
@@ -70,6 +72,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: { email: string }) => {
+      const res = await apiRequest("POST", "/api/forgot-password", data);
+      return await res.json();
+    },
+    onSuccess: (data: { message: string }) => {
+      toast({
+        title: "Password Reset Email Sent",
+        description: data.message,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to send reset email",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: { token: string; password: string }) => {
+      const res = await apiRequest("POST", "/api/reset-password", data);
+      return await res.json();
+    },
+    onSuccess: (data: { message: string }) => {
+      toast({
+        title: "Password Reset Successful",
+        description: data.message,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to reset password",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
       const res = await apiRequest("POST", "/api/register", credentials);
@@ -113,6 +155,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logoutMutation,
         registerMutation,
         magicLinkMutation,
+        forgotPasswordMutation,
+        resetPasswordMutation,
       }}
     >
       {children}
