@@ -17,9 +17,9 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
-      <Route path="/auth/verify" component={VerifyPage} />
+      <Route path="/verify" component={VerifyPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
-      <Route path="/auth/reset-password" component={ResetPasswordPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
       <Route component={NotFound} />
     </Switch>
   );

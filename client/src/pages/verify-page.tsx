@@ -26,24 +26,28 @@ export default function VerifyPage() {
           const res = await apiRequest("GET", `/api/verify?token=${token}&type=reset-password`);
           const data = await res.json();
 
-          if (data.token) {
+          if (res.status === 200 && data.message === "Token valid") {
             toast({
               title: "Success",
-              description: "Your reset token has been verified. Please set your new password.",
+              description: "Token verified. Please set your new password.",
             });
             setLocation(`/reset-password?token=${token}`);
             return;
+          } else {
+            throw new Error(data.message || "Invalid or expired token");
           }
         }
 
         // Handle magic link verification
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
+
+        if (res.status !== 200) {
+          const data = await res.json();
+          throw new Error(data.message || "Verification failed");
+        }
+
         const user = await res.json();
-
-        // Update the auth state
         queryClient.setQueryData(["/api/user"], user);
-
-        // Redirect to home page
         setLocation("/");
 
         toast({
