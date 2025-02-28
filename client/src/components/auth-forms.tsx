@@ -65,7 +65,7 @@ export function LoginForm() {
             )}
           />
           <div className="flex justify-between items-center">
-            <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+            <Link href="/forgot-password" className="text-sm text-foreground hover:underline">
               Forgot Password?
             </Link>
             <Button
@@ -150,7 +150,7 @@ export function ForgotPasswordForm() {
           )}
         />
         <div className="flex justify-between items-center">
-          <Link href="/auth" className="text-sm text-primary hover:underline">
+          <Link href="/auth" className="text-sm text-foreground hover:underline">
             Back to Login
           </Link>
           <Button
