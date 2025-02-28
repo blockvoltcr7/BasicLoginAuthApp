@@ -11,10 +11,9 @@ import { Loader2 } from "lucide-react";
 
 interface Props {
   token: string;
-  onSuccess: () => void;
 }
 
-export function ResetPasswordForm({ token, onSuccess }: Props) {
+export function ResetPasswordForm({ token }: Props) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,11 +39,11 @@ export function ResetPasswordForm({ token, onSuccess }: Props) {
       console.log("[ResetPasswordForm] Password reset successful");
       toast({
         title: "Success",
-        description: "Your password has been reset successfully. Please log in with your new password.",
+        description: "Your password has been reset successfully.",
       });
 
-      // Navigate to login page after successful password reset
-      window.location.href = "/auth";
+      // Navigate to home page after successful password reset
+      window.location.href = "/";
     } catch (error) {
       console.error("[ResetPasswordForm] Password reset error:", error);
       toast({
