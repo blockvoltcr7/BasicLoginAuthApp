@@ -19,6 +19,7 @@ export async function sendMagicLinkEmail(
   const magicLink = `${origin}/auth/verify?token=${token}`;
 
   try {
+    console.log(`Sending magic link email to ${email} with token ${token}`);
     await mailService.send({
       to: email,
       from: process.env.SENDGRID_FROM_EMAIL!,
@@ -37,9 +38,10 @@ export async function sendMagicLinkEmail(
         </div>
       `,
     });
+    console.log('Magic link email sent successfully');
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error('SendGrid magic link email error:', error);
     return false;
   }
 }
@@ -52,6 +54,7 @@ export async function sendPasswordResetEmail(
   const resetLink = `${origin}/auth/reset-password?token=${token}`;
 
   try {
+    console.log(`Sending password reset email to ${email} with token ${token}`);
     await mailService.send({
       to: email,
       from: process.env.SENDGRID_FROM_EMAIL!,
@@ -70,9 +73,15 @@ export async function sendPasswordResetEmail(
         </div>
       `,
     });
+    console.log('Password reset email sent successfully');
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error('SendGrid password reset email error:', {
+      error,
+      email,
+      fromEmail: process.env.SENDGRID_FROM_EMAIL,
+      apiKeyExists: !!process.env.SENDGRID_API_KEY
+    });
     return false;
   }
 }
