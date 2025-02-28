@@ -7,14 +7,16 @@ import { useEffect, useState } from 'react';
 export default function ResetPasswordPage() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const token = new URLSearchParams(location.split('?')[1]).get('token');
+  // Fix: Use window.location.search to get the query parameters correctly
+  const token = new URLSearchParams(window.location.search).get('token');
   const [isPasswordResetSuccessful, setIsPasswordResetSuccessful] = useState(false);
 
   console.log("[ResetPasswordPage] Initializing with:", {
     hasUser: !!user,
     currentUrl: window.location.href,
     hasToken: !!token,
-    location
+    location,
+    searchParams: window.location.search
   });
 
   // Redirect to auth page if user successfully resets their password
