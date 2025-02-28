@@ -6,7 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
-import { sendMagicLinkEmail } from "./email";
+import { sendMagicLinkEmail, sendPasswordResetEmail } from "./email";
 
 declare global {
   namespace Express {
@@ -152,6 +152,51 @@ export function setupAuth(app: Express) {
     } catch (error) {
       console.error("Token verification error:", error);
       res.status(500).json({ message: "Failed to verify token" });
+    }
+  });
+
+  // Add password reset routes
+  app.post("/api/forgot-password", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      // Always return success to prevent email enumeration
+      const user = await storage.getUserByEmail(email);
+
+      if (user) {
+        const token = await storage.createPasswordResetToken(user.id);
+        await sendPasswordResetEmail(
+          email,
+          token.token,
+          `${req.protocol}://${req.get('host')}`
+        );
+      }
+
+      res.json({ message: "If an account exists with that email, a password reset link has been sent." });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Failed to process password reset request" });
+    }
+  });
+
+  app.post("/api/reset-password", async (req, res) => {
+    const { token, password } = req.body;
+
+    try {
+      const resetToken = await storage.validatePasswordResetToken(token);
+
+      if (!resetToken) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      await storage.updateUserPassword(resetToken.userId, hashedPassword);
+      await storage.markPasswordResetTokenAsUsed(token);
+
+      res.json({ message: "Password successfully reset" });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 
