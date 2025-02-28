@@ -16,6 +16,14 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split('@');
+  const maskedLocal = localPart.length > 2 
+    ? `${localPart[0]}${'*'.repeat(localPart.length - 2)}${localPart[localPart.length - 1]}`
+    : '*'.repeat(localPart.length);
+  return `${maskedLocal}@${domain}`;
+}
+
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
@@ -125,7 +133,10 @@ export function setupAuth(app: Express) {
 
       res.json({ message: "Magic link sent to your email" });
     } catch (error) {
-      console.error("Magic link error:", error);
+      console.error("Magic link error:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        email: maskEmail(email)
+      });
       res.status(500).json({ message: "Failed to create magic link" });
     }
   });
@@ -133,7 +144,7 @@ export function setupAuth(app: Express) {
   app.get("/api/verify", async (req, res, next) => {
     const { token, type } = req.query;
 
-    console.log("[/api/verify] Received verification request:", { token, type });
+    console.log("[/api/verify] Received verification request type:", { type });
 
     if (!token || typeof token !== "string") {
       console.log("[/api/verify] Invalid token provided");
@@ -164,7 +175,7 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Invalid or expired token" });
       }
 
-      console.log("[/api/verify] Magic link valid, logging in user:", user.id);
+      console.log("[/api/verify] Magic link valid, logging in user id:", user.id);
       req.login(user, (err) => {
         if (err) return next(err);
         res.json(user);
@@ -194,7 +205,10 @@ export function setupAuth(app: Express) {
 
       res.json({ message: "If an account exists with that email, a password reset link has been sent." });
     } catch (error) {
-      console.error("Password reset error:", error);
+      console.error("Password reset error:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        email: maskEmail(email)
+      });
       res.status(500).json({ message: "Failed to process password reset request" });
     }
   });
@@ -215,7 +229,9 @@ export function setupAuth(app: Express) {
 
       res.json({ message: "Password successfully reset" });
     } catch (error) {
-      console.error("Password reset error:", error);
+      console.error("Password reset error:", {
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
       res.status(500).json({ message: "Failed to reset password" });
     }
   });

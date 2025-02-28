@@ -11,6 +11,14 @@ if (!process.env.SENDGRID_FROM_EMAIL) {
 const mailService = new MailService();
 mailService.setApiKey(process.env.SENDGRID_API_KEY);
 
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split('@');
+  const maskedLocal = localPart.length > 2 
+    ? `${localPart[0]}${'*'.repeat(localPart.length - 2)}${localPart[localPart.length - 1]}`
+    : '*'.repeat(localPart.length);
+  return `${maskedLocal}@${domain}`;
+}
+
 export async function sendMagicLinkEmail(
   email: string,
   token: string,
@@ -19,7 +27,7 @@ export async function sendMagicLinkEmail(
   const magicLink = `${origin}/verify?token=${token}`;
 
   try {
-    console.log(`Sending magic link email to ${email} with token ${token}`);
+    console.log(`Sending magic link email to ${maskEmail(email)} with token ****`);
     await mailService.send({
       to: email,
       from: process.env.SENDGRID_FROM_EMAIL!,
@@ -54,7 +62,7 @@ export async function sendPasswordResetEmail(
   const resetLink = `${origin}/verify?token=${token}&type=reset-password`;
 
   try {
-    console.log(`Sending password reset email to ${email} with token ${token}`);
+    console.log(`Sending password reset email to ${maskEmail(email)} with token ****`);
     await mailService.send({
       to: email,
       from: process.env.SENDGRID_FROM_EMAIL!,
