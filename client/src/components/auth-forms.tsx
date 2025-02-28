@@ -14,6 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
+import { PasswordStrength } from "@/components/ui/password-strength";
+import { useState } from "react";
 
 export function LoginForm() {
   const { loginMutation, magicLinkMutation } = useAuth();
@@ -167,6 +169,7 @@ export function ForgotPasswordForm() {
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const { resetPasswordMutation } = useAuth();
+  const [password, setPassword] = useState("");
   const form = useForm({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -194,8 +197,16 @@ export function ResetPasswordForm({ token }: { token: string }) {
             <FormItem>
               <FormLabel>New Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input 
+                  type="password" 
+                  {...field} 
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setPassword(e.target.value);
+                  }}
+                />
               </FormControl>
+              <PasswordStrength password={password} />
               <FormMessage />
             </FormItem>
           )}
@@ -214,6 +225,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
 export function RegisterForm() {
   const { registerMutation } = useAuth();
+  const [password, setPassword] = useState("");
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
@@ -262,8 +274,16 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input 
+                  type="password" 
+                  {...field} 
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setPassword(e.target.value);
+                  }}
+                />
               </FormControl>
+              <PasswordStrength password={password} />
               <FormMessage />
             </FormItem>
           )}
