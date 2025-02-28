@@ -17,18 +17,24 @@ export default function VerifyPage() {
         const token = searchParams.get("token");
         const type = searchParams.get("type");
 
+        console.log("[VerifyPage] Starting verification with:", { token, type, currentUrl: window.location.href });
+
         if (!token) {
           throw new Error("No token provided");
         }
 
         // Handle password reset token verification
         if (type === "reset-password") {
+          console.log("[VerifyPage] Verifying password reset token");
           const res = await apiRequest("GET", `/api/verify?token=${token}&type=reset-password`);
           const data = await res.json();
 
+          console.log("[VerifyPage] Password reset verification response:", { status: res.status, data });
+
           if (res.status === 200 && data.message === "Token valid") {
-            // Navigate directly to reset password page
-            window.location.href = `/reset-password?token=${token}`;
+            console.log("[VerifyPage] Token valid, redirecting to reset password page");
+            // Use direct navigation to avoid route protection
+            window.location.replace(`/reset-password?token=${token}`);
             return;
           } else {
             throw new Error(data.message || "Invalid or expired token");
@@ -36,6 +42,7 @@ export default function VerifyPage() {
         }
 
         // Handle magic link verification
+        console.log("[VerifyPage] Verifying magic link token");
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
 
         if (res.status !== 200) {
@@ -52,7 +59,7 @@ export default function VerifyPage() {
           description: "You have been successfully logged in",
         });
       } catch (error) {
-        console.error("Verification error:", error);
+        console.error("[VerifyPage] Verification error:", error);
         toast({
           title: "Verification Failed",
           description: error instanceof Error ? error.message : "Failed to verify token",

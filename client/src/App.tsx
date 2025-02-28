@@ -27,12 +27,18 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
 
       {/* Catch-all route */}
-      <Route component={NotFound} />
+      <Route path="*">
+        {(params) => {
+          console.log("[Router] No route match, showing 404 page. Path:", window.location.pathname);
+          return <NotFound />;
+        }}
+      </Route>
     </Switch>
   );
 }
 
 function App() {
+  console.log("[App] Initializing app, current path:", window.location.pathname);
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark">
