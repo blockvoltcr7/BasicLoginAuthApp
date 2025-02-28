@@ -178,7 +178,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => resetPasswordMutation.mutate(data))}
+        onSubmit={form.handleSubmit((data) => {
+          resetPasswordMutation.mutate(data, {
+            onSuccess: () => {
+              window.location.href = "/";
+            }
+          });
+        })}
         className="space-y-4"
       >
         <FormField

@@ -19,11 +19,11 @@ export default function ResetPasswordPage() {
     searchParams: window.location.search
   });
 
-  // Redirect to auth page if user successfully resets their password
+  // Redirect to home page if user successfully resets their password
   useEffect(() => {
     if (isPasswordResetSuccessful) {
-      console.log("[ResetPasswordPage] Password reset successful, redirecting to auth");
-      window.location.href = "/auth";
+      console.log("[ResetPasswordPage] Password reset successful, redirecting to home");
+      window.location.href = "/";
     }
   }, [isPasswordResetSuccessful]);
 
