@@ -16,7 +16,7 @@ export async function sendMagicLinkEmail(
   token: string,
   origin: string
 ): Promise<boolean> {
-  const magicLink = `${origin}/auth/verify?token=${token}`;
+  const magicLink = `${origin}/verify?token=${token}`;
 
   try {
     console.log(`Sending magic link email to ${email} with token ${token}`);
