@@ -27,7 +27,11 @@ export default function VerifyPage() {
           const data = await res.json();
 
           if (data.token) {
-            setLocation(`/auth/reset-password?token=${token}`);
+            toast({
+              title: "Success",
+              description: "Your reset token has been verified. Please set your new password.",
+            });
+            setLocation(`/reset-password?token=${token}`);
             return;
           }
         }
