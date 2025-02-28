@@ -51,7 +51,7 @@ export async function sendPasswordResetEmail(
   token: string,
   origin: string
 ): Promise<boolean> {
-  const resetLink = `${origin}/auth/reset-password?token=${token}`;
+  const resetLink = `${origin}/auth/verify?token=${token}&type=reset-password`;
 
   try {
     console.log(`Sending password reset email to ${email} with token ${token}`);

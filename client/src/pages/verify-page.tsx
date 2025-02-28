@@ -20,6 +20,14 @@ export default function VerifyPage() {
           throw new Error("No token provided");
         }
 
+        // Check if this is a reset password token by looking at the URL path
+        const isResetPasswordToken = window.location.pathname.includes("reset-password");
+        if (isResetPasswordToken) {
+          setLocation(`/auth/reset-password?token=${token}`);
+          return;
+        }
+
+        // Otherwise, proceed with magic link verification
         const res = await apiRequest("GET", `/api/verify?token=${token}`);
         const user = await res.json();
 
@@ -50,7 +58,7 @@ export default function VerifyPage() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <span className="ml-2">Verifying your login...</span>
+      <span className="ml-2">Verifying your request...</span>
     </div>
   );
 }
