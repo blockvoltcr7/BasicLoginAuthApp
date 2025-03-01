@@ -49,19 +49,6 @@ The authentication system is built using:
    - User permissions must be properly scoped
    - Session management should remain consistent with existing auth flow
 
-### 4.2 Non-Functional Requirements
-
-1. **Performance**
-   - Google authentication flow should complete within 5 seconds
-   - Integration should not impact existing authentication methods
-
-2. **Compatibility**
-   - Solution must work across all modern browsers
-   - Mobile responsiveness must be maintained
-
-3. **Compliance**
-   - Solution must comply with Google OAuth requirements
-   - User data handling must comply with privacy regulations
 
 ## 5. Technical Implementation
 
