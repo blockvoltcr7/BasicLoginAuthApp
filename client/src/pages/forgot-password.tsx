@@ -18,14 +18,6 @@ export default function ForgotPasswordPage() {
           <ForgotPasswordForm />
         </Card>
       </div>
-      <div className="hidden md:flex flex-col justify-center p-8 bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-4xl font-bold mb-4">Forgot Your Password?</h2>
-          <p className="text-lg opacity-90">
-            Don't worry! Enter your email address and we'll send you a link to reset your password.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
