@@ -21,20 +21,20 @@ export default function AuthPage() {
         </div>
 
         <GlowingEffect 
-          spread={30} 
-          blur={20}
+          spread={40} 
+          blur={30}
           borderWidth={2}
           variant="default"
           glow={true}
           disabled={false}
           className="rounded-xl"
         >
-          <Card className="w-full bg-zinc-900/70 border-zinc-800 backdrop-blur-sm shadow-xl">
+          <Card className="w-full bg-black/40 border-white/5 backdrop-blur-sm shadow-xl">
             <div className="p-6">
               <Tabs defaultValue="login">
-                <TabsList className="grid w-full grid-cols-2 mb-6 bg-zinc-800">
-                  <TabsTrigger value="login" className="data-[state=active]:bg-zinc-700">Login</TabsTrigger>
-                  <TabsTrigger value="register" className="data-[state=active]:bg-zinc-700">Register</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-6 bg-black/40">
+                  <TabsTrigger value="login" className="data-[state=active]:bg-white/10">Login</TabsTrigger>
+                  <TabsTrigger value="register" className="data-[state=active]:bg-white/10">Register</TabsTrigger>
                 </TabsList>
                 <TabsContent value="login">
                   <LoginForm />
