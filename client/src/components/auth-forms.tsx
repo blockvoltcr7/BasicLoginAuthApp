@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm() {
   return <CustomLoginForm />;
@@ -29,6 +33,8 @@ const resetPasswordSchema = z.object({
 });
 
 export function ForgotPasswordForm() {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -37,8 +43,36 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
-    // TODO: Implement forgot password functionality
-    console.log("Forgot password:", data);
+    setIsLoading(true);
+    try {
+      console.log("[ForgotPasswordForm] Submitting forgot password request:", {
+        email: data.email.split('@')[0] + '@...' // Log only partial email for privacy
+      });
+
+      const res = await apiRequest("POST", "/api/forgot-password", data);
+      const responseData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(responseData.message || "Failed to send reset link");
+      }
+
+      toast({
+        title: "Success",
+        description: "If an account exists with that email, a password reset link has been sent.",
+      });
+
+      console.log("[ForgotPasswordForm] Reset link sent successfully");
+      form.reset();
+    } catch (error) {
+      console.error("[ForgotPasswordForm] Error:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send reset link",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,6 +103,7 @@ export function ForgotPasswordForm() {
                     type="email" 
                     placeholder="your@email.com"
                     className="bg-black border-white/10 focus:border-white/20"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage />
@@ -78,8 +113,16 @@ export function ForgotPasswordForm() {
           <Button
             type="submit"
             className="w-full bg-black hover:bg-white/5 text-white border border-white/10 hover:border-white/20 transition-all duration-300"
+            disabled={isLoading}
           >
-            Send Reset Link
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              'Send Reset Link'
+            )}
           </Button>
         </form>
       </Form>
@@ -87,7 +130,7 @@ export function ForgotPasswordForm() {
   );
 }
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ token, onSuccess }: { token: string; onSuccess: () => void }) {
   const form = useForm({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -97,8 +140,22 @@ export function ResetPasswordForm() {
   });
 
   const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
-    // TODO: Implement reset password functionality
-    console.log("Reset password:", data);
+    try {
+      const res = await apiRequest("POST", "/api/reset-password", {
+        token,
+        password: data.password,
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to reset password");
+      }
+
+      onSuccess();
+    } catch (error) {
+      console.error("[ResetPasswordForm] Error resetting password:", error);
+      throw error;
+    }
   };
 
   return (
