@@ -11,7 +11,7 @@ type ProtectedRouteProps = {
 
 export function ProtectedRoute({ path, component: Component, requireAdmin }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
 
   // List of public routes that don't require authentication
   const isPublicRoute = 
@@ -22,23 +22,12 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
 
   // Handle navigation and auth state changes
   useEffect(() => {
-    // Force check auth status when route changes
     if (!isLoading && !user && !isPublicRoute) {
-      setLocation("/auth");
+      // Clear history state and redirect to auth
+      window.history.replaceState(null, '', '/auth');
+      window.location.replace('/auth');
     }
-  }, [user, isLoading, isPublicRoute, setLocation, location]);
-
-  // Handle browser back/forward navigation
-  useEffect(() => {
-    const handlePopState = () => {
-      if (!user && !isPublicRoute) {
-        setLocation("/auth");
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [user, isPublicRoute, setLocation]);
+  }, [user, isLoading, isPublicRoute, location]);
 
   if (isLoading) {
     return (
@@ -48,11 +37,6 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
         </div>
       </Route>
     );
-  }
-
-  // Handle password reset flow separately
-  if (path === "/reset-password") {
-    return <Route path={path} component={Component} />;
   }
 
   // Handle public routes
