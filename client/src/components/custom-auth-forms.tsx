@@ -38,13 +38,13 @@ export function CustomLoginForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
+      className="w-full space-y-6 bg-black p-8 rounded-xl backdrop-blur-sm border border-white/5"
     >
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Welcome Back
         </h1>
-        <p className="text-gray-400">Enter your credentials to access your account</p>
+        <p className="text-gray-500">Enter your credentials to access your account</p>
       </div>
 
       <form 
@@ -58,7 +58,7 @@ export function CustomLoginForm() {
             {...form.register("username")}
             autoComplete="username"
             placeholder="Enter your username"
-            className="bg-black/50 border-gray-800 focus:border-gray-600"
+            className="bg-black border-white/10 focus:border-white/20"
           />
           {form.formState.errors.username && (
             <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
@@ -73,7 +73,7 @@ export function CustomLoginForm() {
             {...form.register("password")}
             autoComplete="current-password"
             placeholder="Enter your password"
-            className="bg-black/50 border-gray-800 focus:border-gray-600"
+            className="bg-black border-white/10 focus:border-white/20"
           />
           {form.formState.errors.password && (
             <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
@@ -84,7 +84,7 @@ export function CustomLoginForm() {
           <motion.a 
             whileHover={{ scale: 1.05 }}
             href="/forgot-password" 
-            className="text-xs text-gray-400 hover:text-white transition-colors"
+            className="text-xs text-gray-500 hover:text-white transition-colors"
           >
             Forgot Password?
           </motion.a>
@@ -92,7 +92,7 @@ export function CustomLoginForm() {
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+          className="w-full bg-black hover:bg-white/5 text-white border border-white/10 hover:border-white/20 transition-all duration-300"
           disabled={loginMutation.isPending}
         >
           {loginMutation.isPending ? (
@@ -130,13 +130,13 @@ export function CustomRegisterForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
+      className="w-full space-y-6 bg-black p-8 rounded-xl backdrop-blur-sm border border-white/5"
     >
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Create Account
         </h1>
-        <p className="text-gray-400">Enter your details to register a new account</p>
+        <p className="text-gray-500">Enter your details to register a new account</p>
       </div>
 
       <form 
@@ -149,7 +149,7 @@ export function CustomRegisterForm() {
             id="reg-username"
             {...form.register("username")}
             placeholder="Choose a username"
-            className="bg-black/50 border-gray-800 focus:border-gray-600"
+            className="bg-black border-white/10 focus:border-white/20"
           />
           {form.formState.errors.username && (
             <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
@@ -163,7 +163,7 @@ export function CustomRegisterForm() {
             type="email"
             {...form.register("email")}
             placeholder="your@email.com"
-            className="bg-black/50 border-gray-800 focus:border-gray-600"
+            className="bg-black border-white/10 focus:border-white/20"
           />
           {form.formState.errors.email && (
             <p className="text-red-500 text-xs mt-1">{form.formState.errors.email.message}</p>
@@ -181,7 +181,7 @@ export function CustomRegisterForm() {
               setPassword(e.target.value);
             }}
             placeholder="Create a strong password"
-            className="bg-black/50 border-gray-800 focus:border-gray-600"
+            className="bg-black border-white/10 focus:border-white/20"
           />
           <PasswordStrength password={password} />
           {form.formState.errors.password && (
@@ -191,7 +191,7 @@ export function CustomRegisterForm() {
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+          className="w-full bg-black hover:bg-white/5 text-white border border-white/10 hover:border-white/20 transition-all duration-300"
           disabled={registerMutation.isPending}
         >
           {registerMutation.isPending ? (

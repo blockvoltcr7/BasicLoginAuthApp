@@ -46,13 +46,13 @@ export function ForgotPasswordForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
+      className="w-full space-y-6 bg-black p-8 rounded-xl backdrop-blur-sm border border-white/5"
     >
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Reset Password
         </h1>
-        <p className="text-gray-400">Enter your email to receive a password reset link</p>
+        <p className="text-gray-500">Enter your email to receive a password reset link</p>
       </div>
 
       <Form {...form}>
@@ -68,7 +68,7 @@ export function ForgotPasswordForm() {
                     {...field} 
                     type="email" 
                     placeholder="your@email.com"
-                    className="bg-black/50 border-gray-800 focus:border-gray-600"
+                    className="bg-black border-white/10 focus:border-white/20"
                   />
                 </FormControl>
                 <FormMessage />
@@ -77,7 +77,7 @@ export function ForgotPasswordForm() {
           />
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+            className="w-full bg-black hover:bg-white/5 text-white border border-white/10 hover:border-white/20 transition-all duration-300"
           >
             Send Reset Link
           </Button>
@@ -106,13 +106,13 @@ export function ResetPasswordForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
+      className="w-full space-y-6 bg-black p-8 rounded-xl backdrop-blur-sm border border-white/5"
     >
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Create New Password
         </h1>
-        <p className="text-gray-400">Enter your new password below</p>
+        <p className="text-gray-500">Enter your new password below</p>
       </div>
 
       <Form {...form}>
@@ -128,7 +128,7 @@ export function ResetPasswordForm() {
                     {...field} 
                     type="password" 
                     placeholder="Enter your new password"
-                    className="bg-black/50 border-gray-800 focus:border-gray-600"
+                    className="bg-black border-white/10 focus:border-white/20"
                   />
                 </FormControl>
                 <FormMessage />
@@ -146,7 +146,7 @@ export function ResetPasswordForm() {
                     {...field} 
                     type="password" 
                     placeholder="Confirm your new password"
-                    className="bg-black/50 border-gray-800 focus:border-gray-600"
+                    className="bg-black border-white/10 focus:border-white/20"
                   />
                 </FormControl>
                 <FormMessage />
@@ -155,7 +155,7 @@ export function ResetPasswordForm() {
           />
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+            className="w-full bg-black hover:bg-white/5 text-white border border-white/10 hover:border-white/20 transition-all duration-300"
           >
             Reset Password
           </Button>
