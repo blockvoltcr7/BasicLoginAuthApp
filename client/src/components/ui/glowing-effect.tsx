@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { animate } from "motion";
+import { animate } from "framer-motion";
 
 interface GlowingEffectProps {
   blur?: number;
@@ -92,7 +92,9 @@ const GlowingEffect = memo(
             duration: movementDuration,
             ease: [0.16, 1, 0.3, 1],
             onUpdate: (value) => {
-              element.style.setProperty("--start", String(value));
+              if (element) {
+                element.style.setProperty("--start", String(value));
+              }
             },
           });
         });
@@ -101,7 +103,7 @@ const GlowingEffect = memo(
     );
 
     useEffect(() => {
-      if (disabled) return;
+      if (disabled || typeof window === 'undefined') return;
 
       const handleScroll = () => handleMove();
       const handlePointerMove = (e: PointerEvent) => handleMove(e);
