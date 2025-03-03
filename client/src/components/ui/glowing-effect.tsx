@@ -20,15 +20,15 @@ interface GlowingEffectProps {
 
 const GlowingEffect = memo(
   ({
-    blur = 0,
+    blur = 30,
     inactiveZone = 0.7,
-    proximity = 0,
-    spread = 20,
+    proximity = 100,
+    spread = 40,
     variant = "default",
-    glow = false,
+    glow = true,
     className,
-    movementDuration = 2,
-    borderWidth = 1,
+    movementDuration = 1,
+    borderWidth = 2,
     disabled = false,
     children,
   }: GlowingEffectProps) => {
@@ -38,7 +38,7 @@ const GlowingEffect = memo(
 
     const handleMove = useCallback(
       (e?: MouseEvent | { x: number; y: number }) => {
-        if (!containerRef.current) return;
+        if (!containerRef.current || disabled) return;
 
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
@@ -64,7 +64,7 @@ const GlowingEffect = memo(
           const inactiveRadius = 0.5 * Math.min(width, height) * inactiveZone;
 
           if (distanceFromCenter < inactiveRadius) {
-            element.style.setProperty("--active", "0");
+            element.style.setProperty("--active", "0.8");
             return;
           }
 
@@ -74,7 +74,7 @@ const GlowingEffect = memo(
             mouseY > top - proximity &&
             mouseY < top + height + proximity;
 
-          element.style.setProperty("--active", isActive ? "1" : "0");
+          element.style.setProperty("--active", isActive ? "1" : "0.8");
 
           if (!isActive) return;
 
@@ -99,7 +99,7 @@ const GlowingEffect = memo(
           });
         });
       },
-      [inactiveZone, proximity, movementDuration]
+      [inactiveZone, proximity, movementDuration, disabled]
     );
 
     useEffect(() => {
@@ -112,6 +112,12 @@ const GlowingEffect = memo(
       document.body.addEventListener("pointermove", handlePointerMove, {
         passive: true,
       });
+
+      // Set initial glow
+      if (containerRef.current) {
+        containerRef.current.style.setProperty("--active", "0.8");
+        containerRef.current.style.setProperty("--start", "0");
+      }
 
       return () => {
         if (animationFrameRef.current) {
@@ -126,42 +132,26 @@ const GlowingEffect = memo(
       <div className="relative">
         {children}
         <div
-          className={cn(
-            "pointer-events-none absolute -inset-px rounded-[inherit] opacity-0 transition-opacity duration-500",
-            glow && "opacity-100",
-            disabled && "!hidden"
-          )}
-        />
-        <div
           ref={containerRef}
-          style={
-            {
-              "--blur": `${blur}px`,
-              "--spread": spread,
-              "--start": "0",
-              "--active": "0",
-              "--glowingeffect-border-width": `${borderWidth}px`,
-              "--gradient": variant === "white"
-                ? "conic-gradient(from var(--start) at 50% 50%, rgba(255, 255, 255, 0.5) 0deg, transparent 60deg, transparent 300deg, rgba(255, 255, 255, 0.5) 360deg)"
-                : "conic-gradient(from var(--start) at 50% 50%, #dd7bbb 0deg, #d79f1e 90deg, #5a922c 180deg, #4c7894 270deg, #dd7bbb 360deg)",
-            } as React.CSSProperties
-          }
           className={cn(
-            "pointer-events-none absolute -inset-[2px] rounded-[inherit] opacity-0 transition-opacity duration-500",
-            glow && "opacity-100",
-            blur > 0 && "blur-[var(--blur)]",
-            className,
-            disabled && "!hidden"
+            "pointer-events-none absolute -inset-[3px] rounded-[inherit]",
+            disabled && "hidden",
+            className
           )}
         >
           <div
             className={cn(
-              "absolute inset-[1px] rounded-[inherit]",
-              "after:absolute after:inset-[-1px] after:rounded-[inherit]",
-              "after:bg-[var(--gradient)]",
+              "absolute inset-0 rounded-[inherit]",
+              "before:absolute before:-inset-[2px] before:rounded-[inherit]",
+              "before:bg-[radial-gradient(circle_at_50%_50%,rgba(76,120,148,1)_0%,rgba(221,123,187,1)_25%,rgba(90,146,44,1)_50%,transparent_80%)]",
+              "before:opacity-[var(--active)]",
+              "before:blur-[var(--blur)]",
+              "before:transition-opacity before:duration-500",
+              "after:absolute after:-inset-[2px] after:rounded-[inherit]",
+              "after:bg-[conic-gradient(from_var(--start)_at_50%_50%,rgba(76,120,148,1)_0deg,rgba(221,123,187,1)_120deg,rgba(90,146,44,1)_240deg,rgba(76,120,148,1)_360deg)]",
               "after:opacity-[var(--active)]",
-              "after:transition-opacity after:duration-500",
-              "after:blur-[var(--blur)]"
+              "after:blur-[calc(var(--blur)*0.7)]",
+              "after:transition-opacity after:duration-500"
             )}
           />
         </div>

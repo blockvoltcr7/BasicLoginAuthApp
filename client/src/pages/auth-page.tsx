@@ -29,7 +29,7 @@ export default function AuthPage() {
           disabled={false}
           className="rounded-xl"
         >
-          <Card className="w-full bg-black/40 border-white/5 backdrop-blur-sm shadow-xl">
+          <Card className="w-full bg-black/40 border-white/5 backdrop-blur-sm">
             <div className="p-6">
               <Tabs defaultValue="login">
                 <TabsList className="grid w-full grid-cols-2 mb-6 bg-black/40">
