@@ -1,301 +1,139 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema, magicLinkSchema, passwordResetSchema, resetPasswordSchema, type InsertUser } from "@shared/schema";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Link } from "wouter";
-import { PasswordStrength } from "@/components/ui/password-strength";
-import { useState } from "react";
+import { CustomLoginForm, CustomRegisterForm } from "@/components/custom-auth-forms";
 
 export function LoginForm() {
-  const { loginMutation, magicLinkMutation } = useAuth();
-  const passwordForm = useForm({
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  const magicLinkForm = useForm({
-    resolver: zodResolver(magicLinkSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  return (
-    <div className="space-y-6">
-      <Form {...passwordForm}>
-        <form
-          onSubmit={passwordForm.handleSubmit((data) => loginMutation.mutate(data))}
-          className="space-y-4"
-        >
-          <FormField
-            control={passwordForm.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={passwordForm.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-between items-center">
-            <Link href="/forgot-password" className="text-sm text-foreground hover:underline">
-              Forgot Password?
-            </Link>
-            <Button
-              type="submit"
-              disabled={loginMutation.isPending}
-            >
-              Login with Password
-            </Button>
-          </div>
-        </form>
-      </Form>
-
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
-
-      <Form {...magicLinkForm}>
-        <form
-          onSubmit={magicLinkForm.handleSubmit((data) => magicLinkMutation.mutate(data))}
-          className="space-y-4"
-        >
-          <FormField
-            control={magicLinkForm.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button
-            type="submit"
-            className="w-full"
-            variant="outline"
-            disabled={magicLinkMutation.isPending}
-          >
-            Send Magic Link
-          </Button>
-        </form>
-      </Form>
-    </div>
-  );
-}
-
-export function ForgotPasswordForm() {
-  const { forgotPasswordMutation } = useAuth();
-  const form = useForm({
-    resolver: zodResolver(passwordResetSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => forgotPasswordMutation.mutate(data))}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex justify-between items-center">
-          <Link href="/auth" className="text-sm text-foreground hover:underline">
-            Back to Login
-          </Link>
-          <Button
-            type="submit"
-            disabled={forgotPasswordMutation.isPending}
-          >
-            Send Reset Link
-          </Button>
-        </div>
-      </form>
-    </Form>
-  );
-}
-
-export function ResetPasswordForm({ token }: { token: string }) {
-  const { resetPasswordMutation } = useAuth();
-  const [password, setPassword] = useState("");
-  const form = useForm({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: {
-      token,
-      password: "",
-    },
-  });
-
-  return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => {
-          resetPasswordMutation.mutate(data, {
-            onSuccess: () => {
-              window.location.href = "/";
-            }
-          });
-        })}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>New Password</FormLabel>
-              <FormControl>
-                <Input 
-                  type="password" 
-                  {...field} 
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setPassword(e.target.value);
-                  }}
-                />
-              </FormControl>
-              <PasswordStrength password={password} />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={resetPasswordMutation.isPending}
-        >
-          Reset Password
-        </Button>
-      </form>
-    </Form>
-  );
+  return <CustomLoginForm />;
 }
 
 export function RegisterForm() {
-  const { registerMutation } = useAuth();
-  const [password, setPassword] = useState("");
-  const form = useForm<InsertUser>({
-    resolver: zodResolver(insertUserSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-    },
-  });
+  return <CustomRegisterForm />;
+}
+
+// Placeholder implementation for custom auth forms.  Replace with your actual components.
+// This example uses Tailwind CSS for styling and assumes a dark theme is already applied.
+//  You will need to adapt this based on your Aceternity UI component library.
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const CustomLoginForm = () => {
+  const { loginMutation } = useAuth();
+  const form = useForm({ resolver: zodResolver(loginSchema) });
 
   return (
+    <div className="w-full max-w-sm mx-auto p-4 bg-gray-800 rounded-lg shadow-md">
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input 
-                  type="password" 
-                  {...field} 
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setPassword(e.target.value);
-                  }}
-                />
-              </FormControl>
-              <PasswordStrength password={password} />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={registerMutation.isPending}
-        >
-          Register
-        </Button>
+      <form onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}>
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <div>
+                <label htmlFor="username" className="block text-white text-sm font-medium mb-1">Username</label>
+                <FormControl>
+                  <Input id="username" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </FormControl>
+                <FormMessage />
+              </div>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <div>
+                <label htmlFor="password" className="block text-white text-sm font-medium mb-1">Password</label>
+                <FormControl>
+                  <Input type="password" id="password" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </FormControl>
+                <FormMessage />
+              </div>
+            )}
+          />
+          <Button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+            Login
+          </Button>
+          </div>
       </form>
-    </Form>
+      </Form>
+    </div>
   );
-}
+};
+
+
+const registerSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const CustomRegisterForm = () => {
+  const { registerMutation } = useAuth();
+  const form = useForm({ resolver: zodResolver(registerSchema) });
+
+  return (
+    <div className="w-full max-w-sm mx-auto p-4 bg-gray-800 rounded-lg shadow-md">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))}>
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <div>
+                <label htmlFor="username" className="block text-white text-sm font-medium mb-1">Username</label>
+                <FormControl>
+                  <Input id="username" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </FormControl>
+                <FormMessage />
+              </div>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <div>
+                <label htmlFor="email" className="block text-white text-sm font-medium mb-1">Email</label>
+                <FormControl>
+                  <Input type="email" id="email" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </FormControl>
+                <FormMessage />
+              </div>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <div>
+                <label htmlFor="password" className="block text-white text-sm font-medium mb-1">Password</label>
+                <FormControl>
+                  <Input type="password" id="password" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </FormControl>
+                <FormMessage />
+              </div>
+            )}
+          />
+          <Button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+            Register
+          </Button>
+          </div>
+      </form>
+      </Form>
+    </div>
+  );
+};
+
+export {}
