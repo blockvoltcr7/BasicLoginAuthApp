@@ -1,3 +1,4 @@
+
 import { ForgotPasswordForm } from "@/components/auth-forms";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,21 +12,16 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
-      <div className="flex items-center justify-center p-8">
-        <Card className="w-full max-w-md p-6">
-          <h1 className="text-2xl font-bold mb-6">Reset Your Password</h1>
-          <ForgotPasswordForm />
-        </Card>
-      </div>
-      <div className="hidden md:flex flex-col justify-center p-8 bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-4xl font-bold mb-4">Forgot Your Password?</h2>
-          <p className="text-lg opacity-90">
-            Don't worry! Enter your email address and we'll send you a link to reset your password.
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md p-6 shadow-lg">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold">Reset Your Password</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Enter your email address and we'll send you a link to reset your password.
           </p>
         </div>
-      </div>
+        <ForgotPasswordForm />
+      </Card>
     </div>
   );
 }
