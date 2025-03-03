@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
 import { LoginForm, RegisterForm } from "@/components/auth-forms";
@@ -20,7 +19,7 @@ export default function AuthPage() {
           <p className="text-gray-400">Sign in to your account to continue</p>
         </div>
         
-        <Card className="w-full bg-zinc-900/70 border-zinc-800 backdrop-blur-sm shadow-xl">
+        <Card className="w-full bg-black border-zinc-800 backdrop-blur-sm shadow-xl">
           <div className="p-6">
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2 mb-6 bg-zinc-800">
