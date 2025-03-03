@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
+    refetch
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
@@ -52,14 +53,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    // Handle browser navigation (popstate event)
+    const handleNavigation = () => {
+      console.log("[AuthProvider] Navigation detected, refetching auth state");
+      refetch();
+    };
+
     window.addEventListener('storage', handleStorageChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('popstate', handleNavigation);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('popstate', handleNavigation);
     };
-  }, []);
+  }, [refetch]);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {

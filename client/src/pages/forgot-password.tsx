@@ -1,9 +1,17 @@
 import { ForgotPasswordForm } from "@/components/auth-forms";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export default function ForgotPasswordPage() {
   const { user } = useAuth();
+
+  // Explicitly refetch auth state when component mounts
+  useEffect(() => {
+    console.log("[ForgotPasswordPage] Mounting, forcing auth state refresh");
+    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+  }, []);
 
   if (user) {
     return <Redirect to="/" />;

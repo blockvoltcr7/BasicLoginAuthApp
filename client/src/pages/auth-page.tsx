@@ -3,9 +3,17 @@ import { Redirect } from "wouter";
 import { LoginForm, RegisterForm } from "@/components/auth-forms";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
   const { user } = useAuth();
+
+  // Explicitly refetch auth state when component mounts
+  useEffect(() => {
+    console.log("[AuthPage] Mounting, forcing auth state refresh");
+    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+  }, []);
 
   if (user) {
     return <Redirect to="/" />;
