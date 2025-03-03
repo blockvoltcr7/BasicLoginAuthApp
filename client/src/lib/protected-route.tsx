@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
@@ -13,19 +13,32 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
 
-  // Check if this is a public route that doesn't require auth
+  // List of public routes that don't require authentication
   const isPublicRoute = 
     path === "/auth" ||
     path === "/verify" ||
     path === "/reset-password" ||
     path === "/forgot-password";
 
-  // React to auth state changes
-  React.useEffect(() => {
+  // Handle navigation and auth state changes
+  useEffect(() => {
+    // Force check auth status when route changes
     if (!isLoading && !user && !isPublicRoute) {
       setLocation("/auth");
     }
-  }, [user, isLoading, isPublicRoute, setLocation]);
+  }, [user, isLoading, isPublicRoute, setLocation, location]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      if (!user && !isPublicRoute) {
+        setLocation("/auth");
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [user, isPublicRoute, setLocation]);
 
   if (isLoading) {
     return (
@@ -37,14 +50,14 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
     );
   }
 
-  // Handle reset password flow separately
+  // Handle password reset flow separately
   if (path === "/reset-password") {
     return <Route path={path} component={Component} />;
   }
 
-  // Allow access to public routes without auth
+  // Handle public routes
   if (isPublicRoute) {
-    // If user is logged in and trying to access auth pages, redirect to home
+    // Redirect logged-in users away from auth pages
     if (user) {
       return (
         <Route path={path}>
@@ -55,7 +68,7 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
     return <Route path={path} component={Component} />;
   }
 
-  // Require auth for protected routes
+  // Protect private routes
   if (!user || (requireAdmin && !user.isAdmin)) {
     return (
       <Route path={path}>

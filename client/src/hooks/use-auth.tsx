@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import {
   useQuery,
   useMutation,
@@ -26,6 +26,8 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+
+  // Add refetch interval to continuously verify auth status
   const {
     data: user,
     error,
@@ -33,7 +35,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    refetchInterval: 30000, // Check auth status every 30 seconds
+    refetchOnWindowFocus: true, // Recheck when window regains focus
   });
+
+  // Effect to clear auth state if session expires
+  useEffect(() => {
+    const handleStorageChange = () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -134,9 +148,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
+      // Clear all queries and cache
       queryClient.clear();
       queryClient.setQueryData(["/api/user"], null);
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       toast({
