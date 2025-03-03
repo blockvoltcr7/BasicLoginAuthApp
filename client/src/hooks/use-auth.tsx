@@ -83,12 +83,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiRequest("POST", "/api/logout");
     },
     onSuccess: () => {
-      // Clear all queries and cache
+      // Force clear all query cache
       queryClient.clear();
+      // Set user to null
       queryClient.setQueryData(["/api/user"], null);
+      // Force refetch all queries
       queryClient.invalidateQueries();
-
-      // Force reload to clear any stale state
+      // Clear all local storage
+      window.localStorage.clear();
+      // Clear all session storage
+      window.sessionStorage.clear();
+      // Clear history and redirect
+      window.history.replaceState(null, '', '/auth');
       window.location.replace('/auth');
     },
     onError: (error: Error) => {
@@ -150,7 +156,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Password Reset Successful",
         description: data.message,
       });
-      // After successful password reset, redirect to auth page
+      // Force clear auth state and redirect
+      queryClient.clear();
+      queryClient.setQueryData(["/api/user"], null);
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      window.history.replaceState(null, '', '/auth');
       window.location.replace('/auth');
     },
     onError: (error: Error) => {

@@ -23,7 +23,7 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
   // Handle navigation and auth state changes
   useEffect(() => {
     if (!isLoading && !user && !isPublicRoute) {
-      // Clear history state and redirect to auth
+      // Clear history and redirect
       window.history.replaceState(null, '', '/auth');
       window.location.replace('/auth');
     }
