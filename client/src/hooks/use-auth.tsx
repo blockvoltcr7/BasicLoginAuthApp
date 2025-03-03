@@ -1,10 +1,10 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import {
   useQuery,
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser, magicLinkSchema, passwordResetSchema, resetPasswordSchema } from "@shared/schema";
+import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,14 +26,49 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+
+  // Add refetch interval to continuously verify auth status
   const {
     data: user,
     error,
     isLoading,
+    refetch
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    refetchInterval: 30000, // Check auth status every 30 seconds
+    refetchOnWindowFocus: true, // Recheck when window regains focus
   });
+
+  // Effect to clear auth state if session expires
+  useEffect(() => {
+    const handleStorageChange = () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    };
+
+    // Clear auth state when tab is hidden/visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      }
+    };
+
+    // Handle browser navigation (popstate event)
+    const handleNavigation = () => {
+      console.log("[AuthProvider] Navigation detected, refetching auth state");
+      refetch();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('popstate', handleNavigation);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('popstate', handleNavigation);
+    };
+  }, [refetch]);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -46,6 +81,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Login failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/logout");
+    },
+    onSuccess: () => {
+      // Force clear all query cache
+      queryClient.clear();
+      // Set user to null
+      queryClient.setQueryData(["/api/user"], null);
+      // Force refetch all queries
+      queryClient.invalidateQueries();
+      // Clear all local storage
+      window.localStorage.clear();
+      // Clear all session storage
+      window.sessionStorage.clear();
+      // Clear history and redirect
+      window.history.replaceState(null, '', '/auth');
+      window.location.replace('/auth');
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Logout failed",
         description: error.message,
         variant: "destructive",
       });
@@ -102,6 +165,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Password Reset Successful",
         description: data.message,
       });
+      // Force clear auth state and redirect
+      queryClient.clear();
+      queryClient.setQueryData(["/api/user"], null);
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      window.history.replaceState(null, '', '/auth');
+      window.location.replace('/auth');
     },
     onError: (error: Error) => {
       toast({
@@ -123,22 +193,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Registration failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Logout failed",
         description: error.message,
         variant: "destructive",
       });

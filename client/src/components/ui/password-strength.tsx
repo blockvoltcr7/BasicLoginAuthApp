@@ -24,17 +24,17 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
   const getStrengthColor = (score: number) => {
     switch (score) {
       case 0:
-        return "bg-destructive";
+        return "bg-red-500/50";
       case 1:
-        return "bg-orange-500";
+        return "bg-orange-500/50";
       case 2:
-        return "bg-yellow-500";
+        return "bg-yellow-500/50";
       case 3:
-        return "bg-lime-500";
+        return "bg-lime-500/50";
       case 4:
-        return "bg-green-500";
+        return "bg-green-500/50";
       default:
-        return "bg-gray-200";
+        return "bg-gray-200/20";
     }
   };
 
@@ -58,12 +58,12 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm">
-        <span>Password Strength: {getStrengthText(score)}</span>
-        <span className="text-muted-foreground">{score}/4</span>
+        <span className="text-gray-400">Password Strength: <span className="text-white">{getStrengthText(score)}</span></span>
+        <span className="text-gray-500">{score}/4</span>
       </div>
-      <Progress value={(score / 4) * 100} className={getStrengthColor(score)} />
+      <Progress value={(score / 4) * 100} className={`h-1 ${getStrengthColor(score)}`} />
       {feedback && (
-        <p className="text-sm text-muted-foreground mt-1">{feedback}</p>
+        <p className="text-sm text-gray-400 mt-1">{feedback}</p>
       )}
     </div>
   );

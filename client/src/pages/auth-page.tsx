@@ -3,40 +3,46 @@ import { Redirect } from "wouter";
 import { LoginForm, RegisterForm } from "@/components/auth-forms";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export default function AuthPage() {
   const { user } = useAuth();
+
+  // Explicitly refetch auth state when component mounts
+  useEffect(() => {
+    console.log("[AuthPage] Mounting, forcing auth state refresh");
+    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+  }, []);
 
   if (user) {
     return <Redirect to="/" />;
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
-      <div className="flex items-center justify-center p-8">
-        <Card className="w-full max-w-md p-6">
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-              <LoginForm />
-            </TabsContent>
-            <TabsContent value="register">
-              <RegisterForm />
-            </TabsContent>
-          </Tabs>
-        </Card>
-      </div>
-      <div className="hidden md:flex flex-col justify-center p-8 bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
-          <p className="text-lg opacity-90">
-            Access your account to manage your dashboard and settings. New users can
-            register for an account to get started.
-          </p>
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Welcome</h1>
+          <p className="text-gray-400">Sign in to your account to continue</p>
         </div>
+        
+        <Card className="w-full bg-black border-zinc-800 backdrop-blur-sm shadow-xl">
+          <div className="p-6">
+            <Tabs defaultValue="login">
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-zinc-800">
+                <TabsTrigger value="login" className="data-[state=active]:bg-zinc-700">Login</TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-zinc-700">Register</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <LoginForm />
+              </TabsContent>
+              <TabsContent value="register">
+                <RegisterForm />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </Card>
       </div>
     </div>
   );

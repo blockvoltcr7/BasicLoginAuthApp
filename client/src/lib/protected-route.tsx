@@ -1,6 +1,7 @@
+import React, { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Redirect, Route } from "wouter";
+import { Redirect, Route, useLocation } from "wouter";
 
 type ProtectedRouteProps = {
   path: string;
@@ -10,21 +11,23 @@ type ProtectedRouteProps = {
 
 export function ProtectedRoute({ path, component: Component, requireAdmin }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
+  const [location] = useLocation();
 
-  // Check if this is a public route that doesn't require auth
+  // List of public routes that don't require authentication
   const isPublicRoute = 
     path === "/auth" ||
     path === "/verify" ||
     path === "/reset-password" ||
     path === "/forgot-password";
 
-  console.log("[ProtectedRoute]", {
-    path,
-    isPublicRoute,
-    isLoading,
-    hasUser: !!user,
-    currentUrl: window.location.href
-  });
+  // Handle navigation and auth state changes
+  useEffect(() => {
+    if (!isLoading && !user && !isPublicRoute) {
+      // Clear history and redirect
+      window.history.replaceState(null, '', '/auth');
+      window.location.replace('/auth');
+    }
+  }, [user, isLoading, isPublicRoute, location]);
 
   if (isLoading) {
     return (
@@ -36,21 +39,21 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
     );
   }
 
-  // Handle reset password flow separately
-  if (path === "/reset-password") {
-    console.log("[ProtectedRoute] Allowing access to reset password page");
-    return <Route path={path} component={Component} />;
-  }
-
-  // Allow access to public routes without auth
+  // Handle public routes
   if (isPublicRoute) {
-    console.log("[ProtectedRoute] Allowing access to public route:", path);
+    // Redirect logged-in users away from auth pages
+    if (user) {
+      return (
+        <Route path={path}>
+          <Redirect to="/" />
+        </Route>
+      );
+    }
     return <Route path={path} component={Component} />;
   }
 
-  // Require auth for protected routes
+  // Protect private routes
   if (!user || (requireAdmin && !user.isAdmin)) {
-    console.log("[ProtectedRoute] Redirecting to auth due to missing permissions");
     return (
       <Route path={path}>
         <Redirect to="/auth" />
@@ -58,6 +61,5 @@ export function ProtectedRoute({ path, component: Component, requireAdmin }: Pro
     );
   }
 
-  console.log("[ProtectedRoute] Rendering protected component for path:", path);
   return <Route path={path} component={Component} />;
 }
