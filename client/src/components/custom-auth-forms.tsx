@@ -8,7 +8,7 @@ import { CustomLabel } from "@/components/ui/custom-label";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { PasswordStrength } from "./ui/password-strength";
-import { PlaceholdersAndVanishInput } from "./ui/placeholders-and-vanish-input";
+import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
