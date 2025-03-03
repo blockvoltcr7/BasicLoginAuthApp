@@ -8,6 +8,7 @@ import { CustomLabel } from "@/components/ui/custom-label";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { PasswordStrength } from "./ui/password-strength";
+import { PlaceholdersAndVanishInput } from "../ui/placeholders-and-vanish-input";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -120,12 +121,14 @@ export function CustomLoginForm() {
         >
           <div className="space-y-2">
             <CustomLabel htmlFor="username">Username</CustomLabel>
-            <CustomInput
-              id="username"
-              {...passwordForm.register("username")}
-              autoComplete="username"
-              placeholder="Enter your username"
-              className="bg-black border-white/10 focus:border-white/20"
+            <PlaceholdersAndVanishInput
+              placeholders={["Enter your username", "Your username here"]}
+              onChange={(e) => passwordForm.setValue("username", e.target.value)}
+              value={passwordForm.watch("username")}
+              showButton={false}
+              submitOnEnter={false}
+              className="bg-black border-white/10 focus:border-white/20 h-10 overflow-visible"
+              inputClassName="pl-4 pr-4"
             />
             {passwordForm.formState.errors.username && (
               <p className="text-red-500 text-xs mt-1">
@@ -135,7 +138,15 @@ export function CustomLoginForm() {
           </div>
 
           <div className="space-y-2">
-            <CustomLabel htmlFor="password">Password</CustomLabel>
+            <div className="flex justify-between items-center">
+              <CustomLabel htmlFor="password">Password</CustomLabel>
+              <a
+                className="text-xs text-gray-500 hover:text-white transition-colors"
+                href="/forgot-password"
+              >
+                Forgot?
+              </a>
+            </div>
             <CustomInput
               id="password"
               type="password"
@@ -206,6 +217,8 @@ export function CustomLoginForm() {
 export function CustomRegisterForm() {
   const { registerMutation } = useAuth();
   const [password, setPassword] = useState("");
+  const [passwordScore, setPasswordScore] = useState(0);
+
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -226,7 +239,9 @@ export function CustomRegisterForm() {
         <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
           Create Account
         </h1>
-        <p className="text-gray-500">Enter your details to register a new account</p>
+        <p className="text-gray-500">
+          Enter your information to create an account
+        </p>
       </div>
 
       <form
@@ -234,12 +249,15 @@ export function CustomRegisterForm() {
         className="space-y-4"
       >
         <div className="space-y-2">
-          <CustomLabel htmlFor="reg-username">Username</CustomLabel>
-          <CustomInput
-            id="reg-username"
-            {...form.register("username")}
-            placeholder="Choose a username"
-            className="bg-black border-white/10 focus:border-white/20"
+          <CustomLabel htmlFor="register-username">Username</CustomLabel>
+          <PlaceholdersAndVanishInput
+            placeholders={["Choose a username", "Enter your preferred username"]}
+            onChange={(e) => form.setValue("username", e.target.value)}
+            value={form.watch("username")}
+            showButton={false}
+            submitOnEnter={false}
+            className="bg-black border-white/10 focus:border-white/20 h-10 overflow-visible"
+            inputClassName="pl-4 pr-4"
           />
           {form.formState.errors.username && (
             <p className="text-red-500 text-xs mt-1">
@@ -249,13 +267,15 @@ export function CustomRegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <CustomLabel htmlFor="email">Email</CustomLabel>
-          <CustomInput
-            id="email"
-            type="email"
-            {...form.register("email")}
-            placeholder="your@email.com"
-            className="bg-black border-white/10 focus:border-white/20"
+          <CustomLabel htmlFor="register-email">Email</CustomLabel>
+          <PlaceholdersAndVanishInput
+            placeholders={["your@email.com", "Enter your email address"]}
+            onChange={(e) => form.setValue("email", e.target.value)}
+            value={form.watch("email")}
+            showButton={false}
+            submitOnEnter={false}
+            className="bg-black border-white/10 focus:border-white/20 h-10 overflow-visible"
+            inputClassName="pl-4 pr-4"
           />
           {form.formState.errors.email && (
             <p className="text-red-500 text-xs mt-1">
@@ -265,24 +285,24 @@ export function CustomRegisterForm() {
         </div>
 
         <div className="space-y-2">
-          <CustomLabel htmlFor="reg-password">Password</CustomLabel>
+          <CustomLabel htmlFor="password">Password</CustomLabel>
           <CustomInput
-            id="reg-password"
+            id="password"
             type="password"
             {...form.register("password")}
             onChange={(e) => {
-              form.register("password").onChange(e);
+              form.setValue("password", e.target.value);
               setPassword(e.target.value);
             }}
             placeholder="Create a strong password"
             className="bg-black border-white/10 focus:border-white/20"
           />
-          <PasswordStrength password={password} />
           {form.formState.errors.password && (
             <p className="text-red-500 text-xs mt-1">
               {form.formState.errors.password.message}
             </p>
           )}
+          <PasswordStrength password={password} onScoreChange={setPasswordScore} />
         </div>
 
         <Button
