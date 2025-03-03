@@ -9,7 +9,7 @@ return (
           control={form.control}
           rules={{ required: true }}
         />
-        <Button type="submit">Send Reset Link</Button>
+        <Button type="submit" className="w-full">Send Reset Link</Button>
       </form>
     </Form>
   );
