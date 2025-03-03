@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,9 +7,8 @@ import { CustomInput } from "@/components/ui/custom-input";
 import { CustomLabel } from "@/components/ui/custom-label";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { PasswordStrength } from "./password-strength";
+import { PasswordStrength } from "./ui/password-strength";
 
-// Schema definitions
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
@@ -36,51 +34,82 @@ export function CustomLoginForm() {
   });
 
   return (
-    <form 
-      onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}
-      className="space-y-4"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
     >
-      <div className="space-y-2">
-        <CustomLabel htmlFor="username">Username</CustomLabel>
-        <CustomInput 
-          id="username"
-          {...form.register("username")}
-          autoComplete="username"
-          placeholder="Enter your username" 
-        />
-        {form.formState.errors.username && (
-          <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
-        )}
-      </div>
-      
-      <div className="space-y-2">
-        <CustomLabel htmlFor="password">Password</CustomLabel>
-        <CustomInput 
-          id="password"
-          type="password" 
-          {...form.register("password")}
-          autoComplete="current-password"
-          placeholder="Enter your password" 
-        />
-        {form.formState.errors.password && (
-          <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
-        )}
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          Welcome Back
+        </h1>
+        <p className="text-gray-400">Enter your credentials to access your account</p>
       </div>
 
-      <div className="flex justify-end">
-        <a href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300">
-          Forgot Password?
-        </a>
-      </div>
-      
-      <Button
-        type="submit"
-        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white"
-        disabled={loginMutation.isPending}
+      <form 
+        onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}
+        className="space-y-4"
       >
-        {loginMutation.isPending ? "Signing in..." : "Sign in"}
-      </Button>
-    </form>
+        <div className="space-y-2">
+          <CustomLabel htmlFor="username">Username</CustomLabel>
+          <CustomInput 
+            id="username"
+            {...form.register("username")}
+            autoComplete="username"
+            placeholder="Enter your username"
+            className="bg-black/50 border-gray-800 focus:border-gray-600"
+          />
+          {form.formState.errors.username && (
+            <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <CustomLabel htmlFor="password">Password</CustomLabel>
+          <CustomInput 
+            id="password"
+            type="password" 
+            {...form.register("password")}
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            className="bg-black/50 border-gray-800 focus:border-gray-600"
+          />
+          {form.formState.errors.password && (
+            <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
+          )}
+        </div>
+
+        <div className="flex justify-end">
+          <motion.a 
+            whileHover={{ scale: 1.05 }}
+            href="/forgot-password" 
+            className="text-xs text-gray-400 hover:text-white transition-colors"
+          >
+            Forgot Password?
+          </motion.a>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+          disabled={loginMutation.isPending}
+        >
+          {loginMutation.isPending ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-center"
+            >
+              <span className="mr-2">Signing in</span>
+              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </motion.div>
+          ) : (
+            "Sign in"
+          )}
+        </Button>
+      </form>
+    </motion.div>
   );
 }
 
@@ -97,60 +126,88 @@ export function CustomRegisterForm() {
   });
 
   return (
-    <form 
-      onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))}
-      className="space-y-4"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
     >
-      <div className="space-y-2">
-        <CustomLabel htmlFor="reg-username">Username</CustomLabel>
-        <CustomInput 
-          id="reg-username"
-          {...form.register("username")}
-          placeholder="Choose a username" 
-        />
-        {form.formState.errors.username && (
-          <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
-        )}
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          Create Account
+        </h1>
+        <p className="text-gray-400">Enter your details to register a new account</p>
       </div>
-      
-      <div className="space-y-2">
-        <CustomLabel htmlFor="email">Email</CustomLabel>
-        <CustomInput 
-          id="email"
-          type="email"
-          {...form.register("email")}
-          placeholder="your@email.com" 
-        />
-        {form.formState.errors.email && (
-          <p className="text-red-500 text-xs mt-1">{form.formState.errors.email.message}</p>
-        )}
-      </div>
-      
-      <div className="space-y-2">
-        <CustomLabel htmlFor="reg-password">Password</CustomLabel>
-        <CustomInput 
-          id="reg-password"
-          type="password"
-          {...form.register("password")}
-          onChange={(e) => {
-            form.register("password").onChange(e);
-            setPassword(e.target.value);
-          }}
-          placeholder="Create a strong password" 
-        />
-        <PasswordStrength password={password} />
-        {form.formState.errors.password && (
-          <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
-        )}
-      </div>
-      
-      <Button
-        type="submit"
-        className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white"
-        disabled={registerMutation.isPending}
+
+      <form 
+        onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))}
+        className="space-y-4"
       >
-        {registerMutation.isPending ? "Creating account..." : "Create account"}
-      </Button>
-    </form>
+        <div className="space-y-2">
+          <CustomLabel htmlFor="reg-username">Username</CustomLabel>
+          <CustomInput 
+            id="reg-username"
+            {...form.register("username")}
+            placeholder="Choose a username"
+            className="bg-black/50 border-gray-800 focus:border-gray-600"
+          />
+          {form.formState.errors.username && (
+            <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <CustomLabel htmlFor="email">Email</CustomLabel>
+          <CustomInput 
+            id="email"
+            type="email"
+            {...form.register("email")}
+            placeholder="your@email.com"
+            className="bg-black/50 border-gray-800 focus:border-gray-600"
+          />
+          {form.formState.errors.email && (
+            <p className="text-red-500 text-xs mt-1">{form.formState.errors.email.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <CustomLabel htmlFor="reg-password">Password</CustomLabel>
+          <CustomInput 
+            id="reg-password"
+            type="password"
+            {...form.register("password")}
+            onChange={(e) => {
+              form.register("password").onChange(e);
+              setPassword(e.target.value);
+            }}
+            placeholder="Create a strong password"
+            className="bg-black/50 border-gray-800 focus:border-gray-600"
+          />
+          <PasswordStrength password={password} />
+          {form.formState.errors.password && (
+            <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+          disabled={registerMutation.isPending}
+        >
+          {registerMutation.isPending ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-center"
+            >
+              <span className="mr-2">Creating account</span>
+              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </motion.div>
+          ) : (
+            "Create account"
+          )}
+        </Button>
+      </form>
+    </motion.div>
   );
 }

@@ -1,4 +1,12 @@
 import { CustomLoginForm, CustomRegisterForm } from "@/components/custom-auth-forms";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
 
 export function LoginForm() {
   return <CustomLoginForm />;
@@ -8,132 +16,153 @@ export function RegisterForm() {
   return <CustomRegisterForm />;
 }
 
-// Placeholder implementation for custom auth forms.  Replace with your actual components.
-// This example uses Tailwind CSS for styling and assumes a dark theme is already applied.
-//  You will need to adapt this based on your Aceternity UI component library.
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-
-
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
 });
 
-export const CustomLoginForm = () => {
-  const { loginMutation } = useAuth();
-  const form = useForm({ resolver: zodResolver(loginSchema) });
-
-  return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-gray-800 rounded-lg shadow-md">
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))}>
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <div>
-                <label htmlFor="username" className="block text-white text-sm font-medium mb-1">Username</label>
-                <FormControl>
-                  <Input id="username" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </FormControl>
-                <FormMessage />
-              </div>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <div>
-                <label htmlFor="password" className="block text-white text-sm font-medium mb-1">Password</label>
-                <FormControl>
-                  <Input type="password" id="password" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </FormControl>
-                <FormMessage />
-              </div>
-            )}
-          />
-          <Button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-            Login
-          </Button>
-          </div>
-      </form>
-      </Form>
-    </div>
-  );
-};
-
-
-const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email address"),
+const resetPasswordSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords must match",
+  path: ["confirmPassword"],
 });
 
-export const CustomRegisterForm = () => {
-  const { registerMutation } = useAuth();
-  const form = useForm({ resolver: zodResolver(registerSchema) });
+export function ForgotPasswordForm() {
+  const form = useForm({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
+    // TODO: Implement forgot password functionality
+    console.log("Forgot password:", data);
+  };
 
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-gray-800 rounded-lg shadow-md">
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))}>
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <div>
-                <label htmlFor="username" className="block text-white text-sm font-medium mb-1">Username</label>
-                <FormControl>
-                  <Input id="username" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </FormControl>
-                <FormMessage />
-              </div>
-            )}
-          />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
+    >
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          Reset Password
+        </h1>
+        <p className="text-gray-400">Enter your email to receive a password reset link</p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <div>
-                <label htmlFor="email" className="block text-white text-sm font-medium mb-1">Email</label>
+              <FormItem>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" id="email" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <Input 
+                    {...field} 
+                    type="email" 
+                    placeholder="your@email.com"
+                    className="bg-black/50 border-gray-800 focus:border-gray-600"
+                  />
                 </FormControl>
                 <FormMessage />
-              </div>
+              </FormItem>
             )}
           />
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+          >
+            Send Reset Link
+          </Button>
+        </form>
+      </Form>
+    </motion.div>
+  );
+}
+
+export function ResetPasswordForm() {
+  const form = useForm({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
+    // TODO: Implement reset password functionality
+    console.log("Reset password:", data);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full space-y-6 bg-black/80 p-8 rounded-xl backdrop-blur-sm border border-gray-800"
+    >
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+          Create New Password
+        </h1>
+        <p className="text-gray-400">Enter your new password below</p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
-              <div>
-                <label htmlFor="password" className="block text-white text-sm font-medium mb-1">Password</label>
+              <FormItem>
+                <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" id="password" {...field} className="bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <Input 
+                    {...field} 
+                    type="password" 
+                    placeholder="Enter your new password"
+                    className="bg-black/50 border-gray-800 focus:border-gray-600"
+                  />
                 </FormControl>
                 <FormMessage />
-              </div>
+              </FormItem>
             )}
           />
-          <Button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-            Register
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    type="password" 
+                    placeholder="Confirm your new password"
+                    className="bg-black/50 border-gray-800 focus:border-gray-600"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white border border-gray-800 hover:border-gray-700 transition-all duration-300"
+          >
+            Reset Password
           </Button>
-          </div>
-      </form>
+        </form>
       </Form>
-    </div>
+    </motion.div>
   );
-};
+}
 
-export {}
+export {};
