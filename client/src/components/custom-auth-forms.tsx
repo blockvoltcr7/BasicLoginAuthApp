@@ -18,8 +18,19 @@ const magicLinkSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+const registerSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+});
+
 type LoginFormData = z.infer<typeof loginSchema>;
 type MagicLinkFormData = z.infer<typeof magicLinkSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export function CustomLoginForm() {
   const [useMagicLink, setUseMagicLink] = useState(false);
@@ -52,20 +63,22 @@ export function CustomLoginForm() {
           Welcome Back
         </h1>
         <p className="text-gray-500">
-          {useMagicLink 
-            ? "Enter your email to receive a magic link" 
+          {useMagicLink
+            ? "Enter your email to receive a magic link"
             : "Enter your credentials to access your account"}
         </p>
       </div>
 
       {useMagicLink ? (
-        <form 
-          onSubmit={magicLinkForm.handleSubmit((data) => magicLinkMutation.mutate(data))}
+        <form
+          onSubmit={magicLinkForm.handleSubmit((data) =>
+            magicLinkMutation.mutate(data)
+          )}
           className="space-y-4"
         >
           <div className="space-y-2">
             <CustomLabel htmlFor="email">Email</CustomLabel>
-            <CustomInput 
+            <CustomInput
               id="email"
               type="email"
               {...magicLinkForm.register("email")}
@@ -73,7 +86,9 @@ export function CustomLoginForm() {
               className="bg-black border-white/10 focus:border-white/20"
             />
             {magicLinkForm.formState.errors.email && (
-              <p className="text-red-500 text-xs mt-1">{magicLinkForm.formState.errors.email.message}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {magicLinkForm.formState.errors.email.message}
+              </p>
             )}
           </div>
 
@@ -97,13 +112,15 @@ export function CustomLoginForm() {
           </Button>
         </form>
       ) : (
-        <form 
-          onSubmit={passwordForm.handleSubmit((data) => loginMutation.mutate(data))}
+        <form
+          onSubmit={passwordForm.handleSubmit((data) =>
+            loginMutation.mutate(data)
+          )}
           className="space-y-4"
         >
           <div className="space-y-2">
             <CustomLabel htmlFor="username">Username</CustomLabel>
-            <CustomInput 
+            <CustomInput
               id="username"
               {...passwordForm.register("username")}
               autoComplete="username"
@@ -111,29 +128,33 @@ export function CustomLoginForm() {
               className="bg-black border-white/10 focus:border-white/20"
             />
             {passwordForm.formState.errors.username && (
-              <p className="text-red-500 text-xs mt-1">{passwordForm.formState.errors.username.message}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {passwordForm.formState.errors.username.message}
+              </p>
             )}
           </div>
 
           <div className="space-y-2">
             <CustomLabel htmlFor="password">Password</CustomLabel>
-            <CustomInput 
+            <CustomInput
               id="password"
-              type="password" 
+              type="password"
               {...passwordForm.register("password")}
               autoComplete="current-password"
               placeholder="Enter your password"
               className="bg-black border-white/10 focus:border-white/20"
             />
             {passwordForm.formState.errors.password && (
-              <p className="text-red-500 text-xs mt-1">{passwordForm.formState.errors.password.message}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {passwordForm.formState.errors.password.message}
+              </p>
             )}
           </div>
 
           <div className="flex justify-end">
-            <motion.a 
+            <motion.a
               whileHover={{ scale: 1.05 }}
-              href="/forgot-password" 
+              href="/forgot-password"
               className="text-xs text-gray-500 hover:text-white transition-colors"
             >
               Forgot Password?
@@ -208,26 +229,28 @@ export function CustomRegisterForm() {
         <p className="text-gray-500">Enter your details to register a new account</p>
       </div>
 
-      <form 
+      <form
         onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))}
         className="space-y-4"
       >
         <div className="space-y-2">
           <CustomLabel htmlFor="reg-username">Username</CustomLabel>
-          <CustomInput 
+          <CustomInput
             id="reg-username"
             {...form.register("username")}
             placeholder="Choose a username"
             className="bg-black border-white/10 focus:border-white/20"
           />
           {form.formState.errors.username && (
-            <p className="text-red-500 text-xs mt-1">{form.formState.errors.username.message}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {form.formState.errors.username.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
           <CustomLabel htmlFor="email">Email</CustomLabel>
-          <CustomInput 
+          <CustomInput
             id="email"
             type="email"
             {...form.register("email")}
@@ -235,13 +258,15 @@ export function CustomRegisterForm() {
             className="bg-black border-white/10 focus:border-white/20"
           />
           {form.formState.errors.email && (
-            <p className="text-red-500 text-xs mt-1">{form.formState.errors.email.message}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {form.formState.errors.email.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
           <CustomLabel htmlFor="reg-password">Password</CustomLabel>
-          <CustomInput 
+          <CustomInput
             id="reg-password"
             type="password"
             {...form.register("password")}
@@ -254,7 +279,9 @@ export function CustomRegisterForm() {
           />
           <PasswordStrength password={password} />
           {form.formState.errors.password && (
-            <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {form.formState.errors.password.message}
+            </p>
           )}
         </div>
 
